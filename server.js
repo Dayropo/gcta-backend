@@ -5,6 +5,7 @@ const bodyParser = require("body-parser")
 const dotenv = require("dotenv")
 const cors = require("cors")
 const HPP = require("hpp")
+const cookieParser = require("cookie-parser")
 
 const { NotFoundError, ApiError, InternalError } = require("./utilities/core/ApiError")
 
@@ -31,7 +32,8 @@ const app = express()
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://gcta-frontend.vercel.app"],
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
 )
