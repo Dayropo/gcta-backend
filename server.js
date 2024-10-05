@@ -4,6 +4,7 @@ const morgan = require("morgan")
 const bodyParser = require("body-parser")
 const dotenv = require("dotenv")
 const cors = require("cors")
+const HPP = require("hpp")
 
 const { NotFoundError, ApiError, InternalError } = require("./utilities/core/ApiError")
 
@@ -30,9 +31,11 @@ const app = express()
 
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:3000", "https://gcta-frontend.vercel.app"],
+    credentials: true,
   })
 )
+app.use(HPP())
 app.use(morgan("dev"))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
