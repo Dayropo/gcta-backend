@@ -1,6 +1,9 @@
 const { register, login, getUser } = require("../services/user.services")
 const { CreatedResponse, SuccessResponse } = require("../utilities/core/ApiResponse")
 const exec = require("../utilities/core/catchAsync")
+const dotenv = require("dotenv")
+
+dotenv.config()
 
 /**
  * @description A method to handle registering a user
@@ -48,8 +51,8 @@ exports.login = exec(async (req, res) => {
   res.cookie("jwt", response.token, {
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.APP_ENV !== "local" ? "none" : "lax",
+    secure: process.env.APP_ENV !== "local" ? true : false,
   })
 
   /**

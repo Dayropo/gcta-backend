@@ -32,7 +32,7 @@ const app = express()
 
 app.use(
   cors({
-    origin: "*",
+    origin: process.env.APP_ENV === "local" ? "*" : ["https://gcta-frontend.vercel.app"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
