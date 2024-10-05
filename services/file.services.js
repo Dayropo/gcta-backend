@@ -19,7 +19,7 @@ const s3 = new S3Client({
 })
 
 async function upload(file) {
-  const uniqueName = `GCTA-${Date.now()}`
+  const uniqueName = `DSC-${Date.now()}`
 
   const putObjectParams = {
     Bucket: bucketName,

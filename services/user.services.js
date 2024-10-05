@@ -15,12 +15,10 @@ async function register(data) {
     email: data.email,
   })
 
-  if (checkUser) {
-    console.error("-----------DUPLICATE ACCOUNT ERROR----------")
+  if (checkUser)
     throw new DuplicateDataError(
       "User's email already exists. Proceed to login or create an account with a new email address"
     )
-  }
 
   const salt = await bcrypt.genSalt()
   const hashPassword = await bcrypt.hash(data.password, salt)
@@ -36,8 +34,9 @@ async function register(data) {
 
     return data
   } else {
-    console.error("-----------ACCOUNT CREATION ERROR----------")
-    throw new InternalError("An error occurred while creating your account. Please try again later")
+    throw new InternalError(
+      "An error occurred while creating your account. Please try again later!"
+    )
   }
 }
 
@@ -46,17 +45,11 @@ async function login(data) {
     email: data.email,
   })
 
-  if (!user) {
-    console.error("-----------INVALID LOGIN CREDENTIALS----------")
-    throw new AuthFailureError("Invalid login credentials")
-  }
+  if (!user) throw new AuthFailureError("User does not exist!")
 
   const validPassword = await bcrypt.compare(data.password, user.password)
 
-  if (!validPassword) {
-    console.error("-----------INVALID LOGIN CREDENTIALS----------")
-    throw new AuthFailureError("Invalid login credentials")
-  }
+  if (!validPassword) throw new AuthFailureError("Invalid login credentials!")
 
   const token = jwt.sign(
     {
@@ -71,10 +64,7 @@ async function login(data) {
 async function getUser(cookie) {
   const claims = jwt.verify(cookie, process.env.JWT_SECRET)
 
-  if (!claims) {
-    console.error("-----------INVALID TOKEN----------")
-    throw new AuthFailureError("Invalid token")
-  }
+  if (!claims) throw new AuthFailureError("Invalid token")
 
   const user = await User.findOne({ _id: claims._id })
   const { password, ...data } = await user.toJSON()

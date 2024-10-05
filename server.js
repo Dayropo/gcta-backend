@@ -30,9 +30,10 @@ db.once("open", () => {
 
 const app = express()
 
+app.use(cookieParser())
 app.use(
   cors({
-    origin: process.env.APP_ENV === "local" ? "*" : ["https://gcta-frontend.vercel.app"],
+    origin: ["http://localhost:3210", "https://gcta-frontend.vercel.app"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
