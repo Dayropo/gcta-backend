@@ -6,7 +6,7 @@ const {
   DuplicateDataError,
 } = require("../utilities/core/ApiError")
 const jwt = require("jsonwebtoken")
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3")
+const { S3Client, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3")
 const dotenv = require("dotenv")
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
 
@@ -143,6 +143,14 @@ async function deletePost(slug, cookie) {
 
   if (post.author.toString() !== _id.toString())
     throw new AuthFailureError("You are not authorized to delete this post!")
+
+  const deletObjectParams = {
+    Bucket: bucketName,
+    Key: post.mainImage,
+  }
+
+  const command = new DeleteObjectCommand(deletObjectParams)
+  await s3.send(command)
 
   const deletedPost = await Post.findOneAndDelete({ slug })
 

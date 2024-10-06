@@ -1,5 +1,10 @@
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
-const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3")
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3")
 const { InternalError } = require("../utilities/core/ApiError")
 const dotenv = require("dotenv")
 
@@ -51,6 +56,21 @@ async function upload(file) {
   }
 }
 
+async function deleteFile(file) {
+  const deletObjectParams = {
+    Bucket: bucketName,
+    Key: file,
+  }
+
+  const command = new DeleteObjectCommand(deletObjectParams)
+  const deleteResponse = await s3.send(command)
+
+  if (!deleteResponse) throw new InternalError("An error occurred. Please try again later!")
+
+  return deleteResponse
+}
+
 module.exports = {
   upload,
+  deleteFile,
 }
