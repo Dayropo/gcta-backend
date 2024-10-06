@@ -107,8 +107,54 @@ async function getPostBySlug(slug) {
   return post
 }
 
+async function updatePost(data, slug, cookie) {
+  const claims = jwt.verify(cookie, process.env.JWT_SECRET)
+
+  if (!claims) throw new AuthFailureError("Invalid token!")
+
+  const user = await User.findOne({ _id: claims._id })
+  const { _id } = await user.toJSON()
+
+  const post = await Post.findOne({ slug })
+
+  if (!post) throw new InternalError("Post not found!")
+
+  if (post.author.toString() !== _id.toString())
+    throw new AuthFailureError("You are not authorized to update this post!")
+
+  const updatedPost = await Post.findOneAndUpdate({ slug }, { ...data }, { new: true })
+
+  if (!updatedPost) throw new InternalError("An error occurred while updating the post!")
+
+  return updatedPost
+}
+
+async function deletePost(slug, cookie) {
+  const claims = jwt.verify(cookie, process.env.JWT_SECRET)
+
+  if (!claims) throw new AuthFailureError("Invalid token!")
+
+  const user = await User.findOne({ _id: claims._id })
+  const { _id } = await user.toJSON()
+
+  const post = await Post.findOne({ slug })
+
+  if (!post) throw new InternalError("Post not found!")
+
+  if (post.author.toString() !== _id.toString())
+    throw new AuthFailureError("You are not authorized to delete this post!")
+
+  const deletedPost = await Post.findOneAndDelete({ slug })
+
+  if (!deletedPost) throw new InternalError("An error occurred while deleting the post!")
+
+  return deletedPost
+}
+
 module.exports = {
   createPost,
   getAllPosts,
   getPostBySlug,
+  updatePost,
+  deletePost,
 }

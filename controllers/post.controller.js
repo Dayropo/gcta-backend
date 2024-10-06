@@ -1,4 +1,10 @@
-const { createPost, getAllPosts, getPostBySlug } = require("../services/post.services")
+const {
+  createPost,
+  getAllPosts,
+  getPostBySlug,
+  updatePost,
+  deletePost,
+} = require("../services/post.services")
 const { CreatedResponse, SuccessResponse } = require("../utilities/core/ApiResponse")
 const exec = require("../utilities/core/catchAsync")
 
@@ -70,4 +76,53 @@ exports.getPostBySlug = exec(async (req, res) => {
    * @description Returning a success response with the created post data
    */
   new SuccessResponse("Post fetched successfully", response).send(res)
+})
+
+/**
+ * @description A method to handle updating a post
+ * @param req - The request object representing the HTTP request
+ * @param res - The response object representing the HTTP response
+ * @returns {*}
+ */
+exports.updatePost = exec(async (req, res) => {
+  /**
+   * @description Extracting the data from the request body
+   */
+  const data = req.body
+  const { slug } = req.params
+  const cookie = req.cookies.jwt
+
+  /**
+   * @description Calling the updatePost service to handle the post update process
+   */
+  const response = await updatePost(data, slug, cookie)
+
+  /**
+   * @description Returning a success response with the updated post data
+   */
+  new SuccessResponse("Post updated successfully", response).send(res)
+})
+
+/**
+ * @description A method to handle deleting a post
+ * @param req - The request object representing the HTTP request
+ * @param res - The response object representing the HTTP response
+ * @returns {*}
+ */
+exports.deletePost = exec(async (req, res) => {
+  /**
+   * @description Extracting the slug from the request params
+   */
+  const { slug } = req.params
+  const cookie = req.cookies.jwt
+
+  /**
+   * @description Calling the deletePost service to handle the post deletion process
+   */
+  const response = await deletePost(slug, cookie)
+
+  /**
+   * @description Returning a success response with the deleted post data
+   */
+  new SuccessResponse("Post deleted successfully", response).send(res)
 })
