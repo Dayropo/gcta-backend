@@ -7,6 +7,6 @@ const post = require("./post.route")
 
 router.use("/file", file)
 router.use("/user", user)
-router.use("/post", post)
+router.use("/posts", post)
 
 module.exports = router

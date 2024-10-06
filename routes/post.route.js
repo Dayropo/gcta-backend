@@ -1,9 +1,10 @@
 const express = require("express")
-const { createPost, getAllPosts } = require("../controllers/post.controller")
+const { createPost, getAllPosts, getPostBySlug } = require("../controllers/post.controller")
 const { verifyToken } = require("../middleware/verifyToken")
 const router = express.Router()
 
 router.post("/create", verifyToken, createPost)
-router.get("/all", getAllPosts)
+router.get("/", getAllPosts)
+router.get("/:slug", getPostBySlug)
 
 module.exports = router

@@ -6,6 +6,24 @@ const {
   DuplicateDataError,
 } = require("../utilities/core/ApiError")
 const jwt = require("jsonwebtoken")
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3")
+const dotenv = require("dotenv")
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
+
+dotenv.config()
+
+const bucketName = process.env.BUCKET_NAME
+const bucketRegion = process.env.BUCKET_REGION
+const accessKey = process.env.ACCESS_KEY
+const secretAccessKey = process.env.SECRET_ACCESS_KEY
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: accessKey,
+    secretAccessKey: secretAccessKey,
+  },
+  region: bucketRegion,
+})
 
 async function createPost(data, cookie) {
   const claims = jwt.verify(cookie, process.env.JWT_SECRET)
@@ -31,17 +49,66 @@ async function createPost(data, cookie) {
   }
 }
 
-async function getAllPosts() {
-  const posts = await Post.find().populate("author", "name").sort({ publishedAt: -1 })
+async function getAllPosts(author) {
+  if (author && author !== "all") {
+    const posts = await Post.find({ author }).populate("author", "name").sort({ publishedAt: -1 })
 
-  if (!posts)
-    throw new InternalError("An error occurred while fetching posts. Please try again later!")
+    if (!posts)
+      throw new InternalError("An error occurred while fetching posts. Please try again later!")
 
-  return posts
+    for (const post of posts) {
+      const getObjectParams = {
+        Bucket: bucketName,
+        Key: post.mainImage,
+      }
+
+      const command = new GetObjectCommand(getObjectParams)
+      const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
+      post.imageUrl = url
+    }
+
+    return posts
+  } else {
+    const posts = await Post.find().populate("author", "name").sort({ publishedAt: -1 })
+
+    if (!posts)
+      throw new InternalError("An error occurred while fetching posts. Please try again later!")
+
+    for (const post of posts) {
+      const getObjectParams = {
+        Bucket: bucketName,
+        Key: post.mainImage,
+      }
+
+      const command = new GetObjectCommand(getObjectParams)
+      const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
+      post.imageUrl = url
+    }
+
+    return posts
+  }
+}
+
+async function getPostBySlug(slug) {
+  const post = await Post.findOne({ slug }).populate("author", "name")
+
+  if (!post)
+    throw new InternalError("An error occurred while fetching post. Please try again later!")
+
+  const getObjectParams = {
+    Bucket: bucketName,
+    Key: post.mainImage,
+  }
+
+  const command = new GetObjectCommand(getObjectParams)
+  const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
+  post.imageUrl = url
+
+  return post
 }
 
 module.exports = {
   createPost,
   getAllPosts,
-  // getPostById,
+  getPostBySlug,
 }

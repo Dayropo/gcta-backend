@@ -1,4 +1,4 @@
-const { register, login, getUser } = require("../services/user.services")
+const { register, login, getUser, getUsers } = require("../services/user.services")
 const { CreatedResponse, SuccessResponse } = require("../utilities/core/ApiResponse")
 const exec = require("../utilities/core/catchAsync")
 const dotenv = require("dotenv")
@@ -97,4 +97,22 @@ exports.logout = exec(async (req, res) => {
    * @description Returning a success response with the registered user data
    */
   new SuccessResponse("User logged out successfully").send(res)
+})
+
+/**
+ * @description A method to handle getting all users
+ * @param req - The request object representing the HTTP request
+ * @param res - The response object representing the HTTP response
+ * @returns {*}
+ */
+exports.getUsers = exec(async (req, res) => {
+  /**
+   * @description Calling the getUsers service to handle the post creation process
+   */
+  const response = await getUsers()
+
+  /**
+   * @description Returning a success response with the created post data
+   */
+  new SuccessResponse("Users fetched successfully", response).send(res)
 })
